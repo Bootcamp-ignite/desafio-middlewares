@@ -10,19 +10,59 @@ app.use(cors());
 const users = [];
 
 function checksExistsUserAccount(request, response, next) {
-  // Complete aqui
+  const user = users.find((value) => value.username === request.headers.username)
+
+  if (!user) {
+    return response.status(404).json({ error: new Error('user inexistent')})
+  }
+
+  request.user = user;
+  next();
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
-  // Complete aqui
+  const { user } = request;
+
+  if (user.pro === false && user.todos.length < 10) {
+    next();
+  } else if (user.pro == true) {
+    next();
+  }
+
+  return response.status(403).json({ error: new Error('quota limit')})
 }
 
 function checksTodoExists(request, response, next) {
-  // Complete aqui
+  if (!validate(request.params.id)) {
+    return response.status(400).json({ error: new Error('invalid todo id')})
+  }
+
+  const user = users.find((value) => value.username === request.headers.username);
+
+  if(!user) {
+    return response.status(404).json({ error: new Error('inexistent user')})
+  }
+
+  const todo = user.todos.find((value) => value.id === request.params.id);
+
+  if (!todo) {
+    return response.status(404).json({ error: new Error('inexistent todo')})
+  }
+
+  request.todo = todo;
+  request.user = user;
+  next();
 }
 
 function findUserById(request, response, next) {
-  // Complete aqui
+  const user = users.find((value) => value.id === request.params.id)
+
+  if (!user) {
+    return response.status(404).json({ error: new Error('user inexistent')})
+  }
+
+  request.user = user;
+  next();
 }
 
 app.post('/users', (request, response) => {
